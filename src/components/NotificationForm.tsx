@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Phone, Mail, ArrowRight } from "lucide-react";
+import { Phone, Mail, ArrowRight, Loader2 } from "lucide-react";
+import { saveSubscription } from "@/services/database";
+import { sendSms, formatPhoneForTwilio } from "@/services/twilioMessaging";
+import { sendEmail, generateWelcomeEmailHtml } from "@/services/sendgridEmail";
 
 const NotificationForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -23,7 +26,7 @@ const NotificationForm: React.FC = () => {
     return /^[0-9]{10,15}$/.test(phone.replace(/[^0-9]/g, ''));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (activeTab === 'email') {
@@ -48,18 +51,48 @@ const NotificationForm: React.FC = () => {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Save to database
+      const subscription = await saveSubscription({
+        email: activeTab === 'email' ? email : undefined,
+        phone: activeTab === 'phone' ? formatPhoneForTwilio(phone) : undefined
+      });
+
+      // Send confirmation via email or SMS
+      if (activeTab === 'email') {
+        await sendEmail({
+          to: email,
+          subject: "Big Bun Theory - Launch Notification Confirmation",
+          html: generateWelcomeEmailHtml(email)
+        });
+      } else {
+        await sendSms({
+          to: formatPhoneForTwilio(phone),
+          body: "Thanks for signing up for Big Bun Theory launch notifications! We'll text you when we're open. Reply STOP to unsubscribe."
+        });
+      }
+
+      // Show success message
       toast({
         title: "Thank you!",
         description: activeTab === 'email' 
           ? "We'll notify you at " + email + " when we launch." 
           : "We'll notify you at " + phone + " when we launch.",
       });
-      setIsSubmitting(false);
+
+      // Reset form
       setEmail('');
       setPhone('');
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast({
+        title: "Something went wrong",
+        description: "We couldn't save your information. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -141,8 +174,17 @@ const NotificationForm: React.FC = () => {
               className="w-full mt-6 bg-restaurant-primary hover:bg-restaurant-accent text-white h-12 flex items-center justify-center group transition-all duration-300"
               disabled={isSubmitting}
             >
-              <span>Notify Me</span>
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span>Notify Me</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </>
+              )}
             </Button>
           </form>
         </Tabs>
