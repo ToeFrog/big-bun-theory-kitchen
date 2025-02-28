@@ -14,7 +14,7 @@ Follow these steps to deploy this application to Heroku:
 
 ## Deployment Steps
 
-1. **IMPORTANT**: First, run the build helper script to ensure the package.json is correctly configured:
+1. **CRITICAL STEP**: First, run the build helper script to ensure the package.json is correctly configured with the start script:
    ```
    node heroku-build.js
    ```
@@ -24,6 +24,8 @@ Follow these steps to deploy this application to Heroku:
    cat package.json | grep start
    ```
    You should see an output like: `"start": "node server.cjs",`
+   
+   If you don't see this output, the build script didn't run successfully. Try running it again.
 
 3. Build the application locally:
    ```
