@@ -7,7 +7,7 @@ const packageJsonPath = path.join(__dirname, 'package.json');
 const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
 // Update start script
-packageJson.scripts.start = 'node server.js';
+packageJson.scripts.start = 'node server.cjs';
   
 // Write the updated package.json
 fs.writeFileSync(

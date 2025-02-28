@@ -80,8 +80,8 @@ heroku config:set FROM_EMAIL=your_from_email
 If you encounter issues with the application routing, make sure:
 - Your static.json file is correctly set up
 - You have added both buildpacks mentioned above
-- The "start" script in package.json is set to "node server.js"
-- Your server.js file is correctly configured to serve static files from the dist directory
+- The "start" script in package.json is set to "node server.cjs"
+- Your server.cjs file is correctly configured to serve static files from the dist directory
 
 For more help, check Heroku's documentation or run:
 ```
