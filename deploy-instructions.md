@@ -14,33 +14,36 @@ Follow these steps to deploy this application to Heroku:
 
 ## Deployment Steps
 
-1. First, run the build helper script to ensure the package.json is correctly configured:
+1. **IMPORTANT**: First, run the build helper script to ensure the package.json is correctly configured:
    ```
    node heroku-build.js
    ```
 
-2. Build the application locally:
+2. Verify that the start script has been added to package.json:
+   ```
+   cat package.json | grep start
+   ```
+   You should see an output like: `"start": "node server.cjs",`
+
+3. Build the application locally:
    ```
    npm run build
    ```
 
-3. Create a new Heroku app (or use an existing one):
+4. Create a new Heroku app (or use an existing one):
    ```
    heroku create big-bun-notify
    ```
    
-4. Add the Heroku buildpack for Node.js:
+5. Add the Heroku buildpack for Node.js:
    ```
    heroku buildpacks:set heroku/nodejs
    ```
    
-5. Add the Heroku buildpack for static sites:
+6. Add the Heroku buildpack for static sites:
    ```
    heroku buildpacks:add https://github.com/heroku/heroku-buildpack-static.git
    ```
-   
-6. Make sure your Procfile has the correct command:
-   The Procfile should contain: `web: npm run start`
    
 7. Commit any changes to Git:
    ```
