@@ -4,20 +4,18 @@ const fs = require('fs');
 const path = require('path');
 
 const packageJsonPath = path.join(__dirname, 'package.json');
-const packageJson = require(packageJsonPath);
+const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
-// Add start script if it doesn't exist
-if (!packageJson.scripts.start) {
-  packageJson.scripts.start = 'node server.js';
+// Update start script
+packageJson.scripts.start = 'node server.js';
   
-  // Write the updated package.json
-  fs.writeFileSync(
-    packageJsonPath,
-    JSON.stringify(packageJson, null, 2)
-  );
-  
-  console.log('Added "start" script to package.json for Heroku deployment');
-}
+// Write the updated package.json
+fs.writeFileSync(
+  packageJsonPath,
+  JSON.stringify(packageJson, null, 2)
+);
+
+console.log('Updated "start" script to package.json for Heroku deployment');
 
 // Add engines field if it doesn't exist
 if (!packageJson.engines) {
@@ -25,7 +23,7 @@ if (!packageJson.engines) {
     node: '18.x'
   };
   
-  // Write the updated package.json
+  // Write the updated package.json again
   fs.writeFileSync(
     packageJsonPath,
     JSON.stringify(packageJson, null, 2)
@@ -33,3 +31,18 @@ if (!packageJson.engines) {
   
   console.log('Added "engines" field to package.json for Heroku deployment');
 }
+
+// Check if we need to add build script
+if (!packageJson.scripts.build) {
+  packageJson.scripts.build = 'vite build';
+  
+  // Write the updated package.json
+  fs.writeFileSync(
+    packageJsonPath,
+    JSON.stringify(packageJson, null, 2)
+  );
+  
+  console.log('Added "build" script to package.json for Heroku deployment');
+}
+
+console.log('Heroku build script completed successfully');
