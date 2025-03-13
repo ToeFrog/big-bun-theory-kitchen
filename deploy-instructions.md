@@ -70,14 +70,28 @@ Follow these steps to deploy this application to Heroku:
 
 ## Environment Variables (for production)
 
-For production use, you'll want to set actual API keys for Twilio and SendGrid. You can set these environment variables with the following commands:
+For production use, you must set the following environment variables for Twilio and SendGrid:
 
 ```
-heroku config:set TWILIO_ACCOUNT_SID=your_account_sid
-heroku config:set TWILIO_AUTH_TOKEN=your_auth_token
-heroku config:set TWILIO_PHONE_NUMBER=your_twilio_phone
-heroku config:set SENDGRID_API_KEY=your_sendgrid_key
-heroku config:set FROM_EMAIL=your_from_email
+heroku config:set VITE_TWILIO_ACCOUNT_SID=your_account_sid
+heroku config:set VITE_TWILIO_AUTH_TOKEN=your_auth_token
+heroku config:set VITE_TWILIO_PHONE_NUMBER=your_twilio_phone
+heroku config:set VITE_SENDGRID_API_KEY=your_sendgrid_key
+heroku config:set VITE_FROM_EMAIL=your_from_email
+```
+
+Without these, the messaging functionality will not work properly in production.
+
+## Locally Testing SMS and Email
+
+To test locally, you can create a `.env` file in the root directory with the following variables:
+
+```
+VITE_TWILIO_ACCOUNT_SID=your_account_sid
+VITE_TWILIO_AUTH_TOKEN=your_auth_token
+VITE_TWILIO_PHONE_NUMBER=your_twilio_phone
+VITE_SENDGRID_API_KEY=your_sendgrid_key
+VITE_FROM_EMAIL=your_from_email
 ```
 
 ## Troubleshooting

@@ -1,8 +1,10 @@
 
 /**
  * SendGrid Email service for sending email notifications
- * This is a stub implementation that can be replaced with actual SendGrid API calls
+ * This uses the SendGrid API for sending actual emails
  */
+
+import axios from 'axios';
 
 export interface EmailMessage {
   to: string;
@@ -15,11 +17,7 @@ export interface EmailMessage {
  * Send an email using SendGrid
  */
 export const sendEmail = async (email: EmailMessage): Promise<{ success: boolean; messageId?: string; error?: string }> => {
-  // This is a stub function - in a real implementation, this would call the SendGrid API
-  console.log('Sending email via SendGrid:', email);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log('Sending email via SendGrid API:', email);
   
   // Validate email format
   if (!email.to.match(/\S+@\S+\.\S+/)) {
@@ -29,15 +27,61 @@ export const sendEmail = async (email: EmailMessage): Promise<{ success: boolean
       error: 'Invalid email format'
     };
   }
-  
-  // Simulate successful email delivery
-  const messageId = `email_${Math.random().toString(36).substring(2, 10)}`;
-  console.log('Email sent successfully, message ID:', messageId);
-  
-  return {
-    success: true,
-    messageId
-  };
+
+  try {
+    // Get SendGrid API key from environment variables
+    const apiKey = import.meta.env.VITE_SENDGRID_API_KEY || 'SG.0000000000000000000000000000000000000000000000';
+    const fromEmail = import.meta.env.VITE_FROM_EMAIL || 'noreply@bigbuntheory.com';
+    
+    // Format the SendGrid API request
+    const url = 'https://api.sendgrid.com/v3/mail/send';
+    const payload = {
+      personalizations: [
+        {
+          to: [{ email: email.to }],
+          subject: email.subject,
+        },
+      ],
+      from: { email: fromEmail, name: 'Big Bun Theory' },
+      content: [
+        {
+          type: 'text/plain',
+          value: email.text || '',
+        }
+      ]
+    };
+
+    // Add HTML content if provided
+    if (email.html) {
+      payload.content.push({
+        type: 'text/html',
+        value: email.html,
+      });
+    }
+
+    // Send request to SendGrid API
+    const response = await axios.post(url, payload, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    // Generate a pseudo messageId since SendGrid doesn't return one in the same way
+    const messageId = `email_${Math.random().toString(36).substring(2, 10)}`;
+    console.log('Email sent successfully via SendGrid, message ID:', messageId);
+    
+    return {
+      success: true,
+      messageId
+    };
+  } catch (error: any) {
+    console.error('Error sending email via SendGrid:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Failed to send email'
+    };
+  }
 };
 
 /**

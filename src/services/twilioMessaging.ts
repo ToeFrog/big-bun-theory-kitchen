@@ -1,8 +1,10 @@
 
 /**
  * Twilio Messaging service for sending SMS notifications
- * This is a stub implementation that can be replaced with actual Twilio API calls
+ * This uses the Twilio API for sending actual SMS messages
  */
+
+import axios from 'axios';
 
 export interface SmsMessage {
   to: string;
@@ -13,11 +15,7 @@ export interface SmsMessage {
  * Send an SMS message using Twilio
  */
 export const sendSms = async (message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> => {
-  // This is a stub function - in a real implementation, this would call the Twilio API
-  console.log('Sending SMS via Twilio:', message);
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log('Sending SMS via Twilio API:', message);
   
   // Validate phone number format (simple validation)
   if (!message.to.match(/^\+?[0-9]{10,15}$/)) {
@@ -27,23 +25,44 @@ export const sendSms = async (message: SmsMessage): Promise<{ success: boolean; 
       error: 'Invalid phone number format'
     };
   }
-  
-  // In a production environment, you would use Twilio SDK with API credentials
-  // const twilioClient = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-  // const result = await twilioClient.messages.create({
-  //   body: message.body,
-  //   to: message.to,
-  //   from: process.env.TWILIO_PHONE_NUMBER
-  // });
-  
-  // Simulate successful message delivery
-  const messageId = `msg_${Math.random().toString(36).substring(2, 10)}`;
-  console.log('SMS sent successfully, message ID:', messageId);
-  
-  return {
-    success: true,
-    messageId
-  };
+
+  try {
+    // Get Twilio credentials from environment variables
+    const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID || 'AC00000000000000000000000000000000';
+    const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN || '00000000000000000000000000000000';
+    const fromNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER || '+15555555555';
+
+    // Format the Twilio API request
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const payload = new URLSearchParams();
+    payload.append('To', message.to);
+    payload.append('From', fromNumber);
+    payload.append('Body', message.body);
+
+    // Send request to Twilio API
+    const response = await axios.post(url, payload, {
+      auth: {
+        username: accountSid,
+        password: authToken,
+      },
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    });
+
+    console.log('SMS sent successfully, message ID:', response.data.sid);
+    
+    return {
+      success: true,
+      messageId: response.data.sid
+    };
+  } catch (error: any) {
+    console.error('Error sending SMS via Twilio:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message || 'Failed to send SMS'
+    };
+  }
 };
 
 /**
