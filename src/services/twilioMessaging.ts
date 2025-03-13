@@ -1,10 +1,10 @@
 
 /**
  * Twilio Messaging service for sending SMS notifications
- * This uses the Twilio API for sending actual SMS messages
+ * This uses the Twilio SDK for sending actual SMS messages
  */
 
-import axios from 'axios';
+import twilio from 'twilio';
 
 export interface SmsMessage {
   to: string;
@@ -15,7 +15,7 @@ export interface SmsMessage {
  * Send an SMS message using Twilio
  */
 export const sendSms = async (message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> => {
-  console.log('Sending SMS via Twilio API:', message);
+  console.log('Sending SMS via Twilio SDK:', message);
   
   // Validate phone number format (simple validation)
   if (!message.to.match(/^\+?[0-9]{10,15}$/)) {
@@ -32,35 +32,27 @@ export const sendSms = async (message: SmsMessage): Promise<{ success: boolean; 
     const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN || '00000000000000000000000000000000';
     const fromNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER || '+15555555555';
 
-    // Format the Twilio API request
-    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-    const payload = new URLSearchParams();
-    payload.append('To', message.to);
-    payload.append('From', fromNumber);
-    payload.append('Body', message.body);
+    // Initialize the Twilio client
+    const client = twilio(accountSid, authToken);
 
-    // Send request to Twilio API
-    const response = await axios.post(url, payload, {
-      auth: {
-        username: accountSid,
-        password: authToken,
-      },
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+    // Send message using Twilio SDK
+    const twilioMessage = await client.messages.create({
+      body: message.body,
+      from: fromNumber,
+      to: message.to
     });
 
-    console.log('SMS sent successfully, message ID:', response.data.sid);
+    console.log('SMS sent successfully, message ID:', twilioMessage.sid);
     
     return {
       success: true,
-      messageId: response.data.sid
+      messageId: twilioMessage.sid
     };
   } catch (error: any) {
-    console.error('Error sending SMS via Twilio:', error.response?.data || error.message);
+    console.error('Error sending SMS via Twilio:', error.message);
     return {
       success: false,
-      error: error.response?.data?.message || error.message || 'Failed to send SMS'
+      error: error.message || 'Failed to send SMS'
     };
   }
 };
