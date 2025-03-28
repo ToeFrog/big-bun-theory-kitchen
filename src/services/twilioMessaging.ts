@@ -1,10 +1,8 @@
 
 /**
  * Twilio Messaging service for sending SMS notifications
- * This uses the Twilio SDK for sending actual SMS messages
+ * This uses a browser-compatible approach to handle SMS requests
  */
-
-import twilio from 'twilio';
 
 export interface SmsMessage {
   to: string;
@@ -12,10 +10,11 @@ export interface SmsMessage {
 }
 
 /**
- * Send an SMS message using Twilio
+ * Send an SMS message using Twilio via an API endpoint
+ * This is a mock implementation for the browser environment
  */
 export const sendSms = async (message: SmsMessage): Promise<{ success: boolean; messageId?: string; error?: string }> => {
-  console.log('Sending SMS via Twilio SDK:', message);
+  console.log('SMS would be sent with:', message);
   
   // Validate phone number format (simple validation)
   if (!message.to.match(/^\+?[0-9]{10,15}$/)) {
@@ -27,29 +26,20 @@ export const sendSms = async (message: SmsMessage): Promise<{ success: boolean; 
   }
 
   try {
-    // Get Twilio credentials from environment variables
-    const accountSid = import.meta.env.VITE_TWILIO_ACCOUNT_SID || 'AC00000000000000000000000000000000';
-    const authToken = import.meta.env.VITE_TWILIO_AUTH_TOKEN || '00000000000000000000000000000000';
-    const fromNumber = import.meta.env.VITE_TWILIO_PHONE_NUMBER || '+15555555555';
-
-    // Initialize the Twilio client
-    const client = twilio(accountSid, authToken);
-
-    // Send message using Twilio SDK
-    const twilioMessage = await client.messages.create({
-      body: message.body,
-      from: fromNumber,
-      to: message.to
-    });
-
-    console.log('SMS sent successfully, message ID:', twilioMessage.sid);
+    // In a production environment, you would:
+    // 1. Send this request to your backend API
+    // 2. The backend would use the Twilio SDK to send the actual SMS
+    // For now, we'll simulate a successful response
     
+    const mockMessageId = 'SM' + Math.random().toString(36).substring(2, 15);
+    
+    console.log('SMS simulation successful, mock message ID:', mockMessageId);
     return {
       success: true,
-      messageId: twilioMessage.sid
+      messageId: mockMessageId
     };
   } catch (error: any) {
-    console.error('Error sending SMS via Twilio:', error.message);
+    console.error('Error in SMS simulation:', error.message);
     return {
       success: false,
       error: error.message || 'Failed to send SMS'
