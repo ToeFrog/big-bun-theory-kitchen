@@ -9,6 +9,7 @@ import { Phone, Mail, ArrowRight, Loader2 } from "lucide-react";
 import { saveSubscription } from "@/services/database";
 import { sendSms, formatPhoneForTwilio } from "@/services/twilioMessaging";
 import { sendEmail, generateWelcomeEmailHtml } from "@/services/sendgridEmail";
+import { Link } from "react-router-dom";
 
 const NotificationForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -186,6 +187,13 @@ const NotificationForm: React.FC = () => {
                 </>
               )}
             </Button>
+            <div className="mt-4 text-center text-xs text-restaurant-dark/60">
+              By signing up, you agree to our{' '}
+              <Link to="/privacy-policy" className="text-restaurant-primary hover:underline">
+                Privacy Policy
+              </Link>
+              , which includes information on opting in and out of communications.
+            </div>
           </form>
         </Tabs>
       </div>
