@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import Logo from '@/components/Logo';
 import NotificationForm from '@/components/NotificationForm';
-import BurgerChefIcon from '@/components/BurgerChefIcon';
+import { ChefHat } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
@@ -50,7 +50,7 @@ const Index = () => {
         {/* Logo */}
         <div className="mb-4 md:mb-8 relative">
           <div className="absolute -top-8 -left-8 w-16 h-16 opacity-0 animate-fade-in" style={{ animationDelay: '1s' }}>
-            <BurgerChefIcon className="w-full h-full text-restaurant-primary" />
+            <ChefHat className="w-full h-full text-restaurant-primary" />
           </div>
           <Logo className="text-center" />
         </div>
